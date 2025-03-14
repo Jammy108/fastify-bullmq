@@ -28,7 +28,7 @@ const run = async () => {
   });
 
 
-  const basePath = '/'
+  const basePath = '/ui'
   serverAdapter.setBasePath(basePath);
   app.route(basePath, serverAdapter.registerPlugin());
 
