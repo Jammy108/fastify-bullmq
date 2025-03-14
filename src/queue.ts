@@ -1,4 +1,4 @@
-import { ConnectionOptions, Queue, QueueScheduler, Worker } from 'bullmq';
+import { ConnectionOptions, Queue, Worker } from 'bullmq';
 
 import { env } from './env';
 
@@ -9,26 +9,17 @@ const connection: ConnectionOptions = {
   password: env.REDISPASSWORD,
 };
 
+const sleep = (t: number) => new Promise((resolve) => setTimeout(resolve, t * 1000));
+
+
 export const createQueue = (name: string) => new Queue(name, { connection });
 
-export const setupQueueProcessor = async (queueName: string) => {
-  const queueScheduler = new QueueScheduler(queueName, {
-    connection,
-  });
-  await queueScheduler.waitUntilReady();
-
-  /**
-   * This is a dummy worker set up to demonstrate job progress and to
-   * randomly fail jobs to demonstrate the UI.
-   *
-   * In a real application, you would want to set up a worker that
-   * actually does something useful.
-   */
-
+export async function setupBullMQProcessor(queueName: string) {
   new Worker(
     queueName,
     async (job) => {
       for (let i = 0; i <= 100; i++) {
+        await sleep(Math.random());
         await job.updateProgress(i);
         await job.log(`Processing job at interval ${i}`);
 
@@ -39,4 +30,4 @@ export const setupQueueProcessor = async (queueName: string) => {
     },
     { connection }
   );
-};
+}
